@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bunny</title>
+    <script src="./lib/threeJS/build/three.js"></script>
+    <script src="./lib/threeJS/examples/js/loaders/VTKLoader.js"></script>
+    <style>
+        #show {
+            border: 1px solid #ccc;
+            width: 100%;
+            height: 400px;
+            cursor: pointer;
+            background-color: #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="show"></div>
+
+    <script>
+        let width = document.querySelector('#show').clientWidth
+        let height = document.querySelector('#show').clientHeight
+
+        let scene = new THREE.Scene()
+
+        let camera = new THREE.PerspectiveCamera(60, width / height, 0.01, 10000)
+        camera.position.z = 1;
+        camera.position.x = 0.1;
+        camera.position.y = 0.1;
+
+
+        // let dirLight = new THREE.DirectionalLight(0xffffff);
+        // dirLight.position.set(200, 200, 1000).normalize();
+
+        // camera.add(dirLight);
+        // camera.add(dirLight.target);
+        let light = new THREE.PointLight(0xffffff)
+        light.position.set(10, 10, 10)
+        scene.add(light)
+
+
+        let axis = new THREE.AxesHelper(1, 1, 1)
+        scene.add(axis)
+
+        let material = new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide })
+        // let material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        let loader = new THREE.VTKLoader()
+        loader.load('./lib/threeJS/examples/models/vtk/bunny.vtk', geometry => {
+            let bunny = new THREE.Mesh(geometry, material)
+            bunny.position.set(0, -0.09, 0)
+            scene.add(bunny)
+        })
+
+        // let light = new THREE.DirectionalLight(0xffffff, 1)
+        // light.position.set(200, 200, 1000)
+        // scene.add(light)
+
+
+        let renderer = new THREE.WebGLRenderer({ antialias: false })
+        renderer.setSize(width, height)
+        renderer.setClearColor(0xcccccc)
+        document.querySelector('#show').appendChild(renderer.domElement)
+
+        function animation() {
+            requestAnimationFrame(animation)
+            // renderer.clear()
+            renderer.render(scene, camera)
+        }
+
+        animation()
+    </script>
+</body>
+
+</html>

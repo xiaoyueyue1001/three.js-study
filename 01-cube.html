@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cube</title>
+    <script src="./lib/threeJS/build/three.js"></script>
+</head>
+
+<body>
+    <script>
+        //新建场景
+        let scene = new THREE.Scene()
+
+        //新建相机
+        let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
+        camera.position.z = 10
+
+        //新建渲染器
+        let renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight)
+        renderer.setClearColor(0xffffff)
+        document.body.appendChild(renderer.domElement)
+
+        //定义几何形状
+        let geometry = new THREE.CubeGeometry(2, 2, 2)
+        //定义材质包
+        let material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        //组合成几何体
+        let cube = new THREE.Mesh(geometry, material)
+
+        //将几何体添加到场景
+        scene.add(cube)
+
+        //渲染
+        render();
+
+
+        function render() {
+            requestAnimationFrame(render)
+            cube.rotation.x += 0.05
+            cube.rotation.y += 0.05
+            renderer.render(scene, camera)
+        }
+
+    </script>
+</body>
+
+</html>

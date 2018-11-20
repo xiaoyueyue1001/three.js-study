@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="./lib/threeJS/build/three.js"></script>
+    <style>
+        #show {
+            border: 1px solid #ccc;
+            width: 100%;
+            height: 400px;
+            cursor: pointer;
+            background-color: #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="show"></div>
+
+    <script>
+        let cube
+        let width = document.querySelector('#show').clientWidth
+        let height = document.querySelector('#show').clientHeight
+
+        let renderer = new THREE.WebGLRenderer()
+        renderer.setClearColor(0xffffff)
+        renderer.setSize(width, height)
+        document.querySelector('#show').appendChild(renderer.domElement)
+
+        let camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000)
+        camera.position.z = 50
+        camera.position.x = 0
+        camera.position.y = 0
+
+        let scene = new THREE.Scene()
+
+        // let light = new THREE.a
+
+        let geometry = new THREE.CubeGeometry(10, 10, 10)
+        // geometry.vertices[0].uv = new THREE.Vector2(0, 0);
+        // geometry.vertices[1].uv = new THREE.Vector2(2, 0);
+        // geometry.vertices[2].uv = new THREE.Vector2(2, 2);
+        // geometry.vertices[3].uv = new THREE.Vector2(0, 2);
+        let loader = new THREE.TextureLoader()
+        let texture = loader.load('./image/tu.jpg', t => {
+            let material = new THREE.MeshBasicMaterial({ map: t })
+            cube = new THREE.Mesh(geometry, material)
+            cube.position.set(-5, -5, -5)
+            scene.add(cube)
+            // renderer.clear()
+            // renderer.render(scene, camera);
+        })
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.clear()
+            renderer.render(scene, camera);
+            if (cube) {
+                cube.rotation.x += 0.02
+                cube.rotation.z += 0.02
+            }
+        }
+
+        animate()
+    </script>
+</body>
+
+</html>
