@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bunny</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        html,
+        body{
+            height: 100%;
+        }
+        .show {
+            width: 100%;
+            height: 100%;
+            min-height: 800px;
+            border: 1px solid #ccc;
+        }
+        .win{
+            width: 600px;
+            height: 400px;
+            border: 1px solid #2283b8;
+            position: absolute;
+            z-index: 999;
+            top: 50%;
+            transform: translate3d(-50%,-50%,0);
+            left: 50%;
+            background-color: #fff;
+        }
+
+    </style>
+    <script src="./lib/three.js"></script>
+    <script src="./lib/OrbitControls.js"></script>
+    <script src="./lib/MTLLoader.js"></script>
+    <script src="./lib/loaders/LoaderSupport.js"></script>
+    <script src="./lib/loaders/OBJLoader.js"></script>
+    <script src="./lib/loaders/OBJLoader2.js"></script>
+    <script src="./lib/three.interaction.js"></script>
+    <script src="./lib/SceneUtils.js"></script>
+    <script src="./lib/dat.gui.min.js"></script>
+    <script src="./lib/stats.min.js"></script>
+</head>
+<body>
+    <div class="show"></div>
+
+
+    <div class="win" style="display: none">
+        Camera Window!
+    </div>
+
+    <script>
+        let width = document.querySelector('.show').clientWidth;
+        let height = document.querySelector('.show').clientHeight;
+        let scene,
+            camera,cameraGroup,
+            renderer,
+            controls,
+            stats,
+            ambientLight,keyLight,keyLightSphere,
+            axis;
+        let modeArray=[];//用于存放读取的外部模型
+        let phase = 0
+
+        function init(){
+            initSeenen();
+            initCamera();
+            initRenderer();
+            initControls();
+            initStats();
+            initInteraction();
+            initLight();
+            initAxis();
+            loaderMode();
+            animation()
+            window.addEventListener( 'resize', onWindowResize, false );
+        }
+        function initSeenen(){
+            scene = new THREE.Scene();
+        }
+        function initCamera(){
+            camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100000);
+            camera.position.set(210,220,250);
+            camera.lookAt(scene.position)
+            cameraGroup = new THREE.Group();
+            cameraGroup.add(camera)
+            scene.add(cameraGroup)
+        }
+        function initRenderer(){
+            renderer = new THREE.WebGLRenderer({
+                antialias:true,
+                precision: 'highp',
+                premultipliedAlpha:true
+            });
+            renderer.setClearColor(0x0e1e38);
+            renderer.setSize(width, height);
+            document.querySelector(".show").appendChild(renderer.domElement);
+        }
+        function initControls(){
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.addEventListener('change', ()=>{renderer.render(scene, camera);});
+        }
+        function initStats() {
+            stats =  new Stats();
+            stats.setMode(0); // 0: fps, 1: ms
+
+            // Align top-left
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+
+            document.querySelector(".show").appendChild(stats.domElement);
+        }
+        function initInteraction(){
+            new THREE.Interaction(renderer,scene,camera);
+        }
+        function initLight(){
+            ambientLight = new THREE.AmbientLight(0xffffff,0.5);
+            scene.add(ambientLight);
+            keyLight = new THREE.SpotLight(0xffffff);
+            keyLight.position.set(300, 100, 500);
+            keyLight.target.position.set(0, 0, 0);
+            keyLightSphere = new THREE.Mesh(new THREE.SphereGeometry(5,20,20),new THREE.MeshBasicMaterial({color:0x00ffff}));
+            keyLightSphere.position.copy(keyLight.position);
+            scene.add(keyLightSphere)
+            scene.add(keyLight)
+        }
+        function initAxis(){
+            axis = new THREE.AxesHelper(10000);
+            scene.add(axis)
+        }
+        function loaderMode() {
+            let loader  = new THREE.OBJLoader2();
+            loader.load('./mode/palace/palace/OBJ2/palace2.obj',obj=>{
+
+                let group = obj.detail.loaderRootNode;
+                group.traverse(child=>{
+                    if(child instanceof THREE.Mesh){
+                        let geometry = child.geometry;
+                        geometry.computeVertexNormals();
+                        let mode = new Mode({geometry,speed:0.05});
+                        modeArray.push(mode);
+                    }
+                })
+                let loadGroup = new THREE.Group();
+                modeArray.forEach(mode=>{
+                    loadGroup.add(mode.modeGroup)
+                })
+
+                addCamera(loadGroup);
+                loadGroup.position.set(0,0,0)
+                scene.add(loadGroup)
+            })
+        }
+        function animation() {
+            stats.update();
+            requestAnimationFrame(animation);
+            controls.update();
+            renderer.render(scene, camera);
+            update();
+        }
+        function update() {
+            cameraGroup.rotateOnAxis(new THREE.Vector3(0,1,0).normalize(),0.005 )
+            modeArray.forEach(mode=>{
+                mode&&mode.update();
+            })
+
+            phase +=0.05
+            keyLight.position.z = +(100 * (Math.sin(phase)));
+            keyLight.position.x = +(200 * (Math.cos(phase)));
+            keyLight.position.y = +(30 * (Math.cos(phase)))+100;
+            keyLightSphere.position.copy(keyLight.position);
+        }
+        function Mode({geometry,speed}) {
+            this.speed = speed;
+            this.modeGroup = new THREE.Group();
+
+            let vertexShader = `
+                attribute float phase;
+                uniform float time;
+                varying float vPhase;
+                void main(){
+                    vPhase = phase+time;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `
+            let fragmentShader = `
+                uniform vec3 color;
+                varying float vPhase;
+                void main(){
+                    float alpha = abs(sin(vPhase));
+                    gl_FragColor = vec4(color,alpha );
+                }
+            `
+            this.uniforms = {
+                time:{
+                    type:'float',
+                    value:0
+                },
+                color: {
+                    type:'float',
+                    value: new THREE.Color(0x2283b8 )
+                }
+            }
+            let attributes = {
+                phase:{
+                    type:'float',
+                    value:new Float32Array(geometry.attributes.position.count)
+                }
+            }
+            let count = 0;
+            attributes.phase.value=attributes.phase.value.map(v=>{
+                // return Math.random()*Math.PI
+                count++
+                return (count%4)<2?Math.PI*0.5:0
+            })
+            let frameShader = new THREE.ShaderMaterial({
+                vertexShader,fragmentShader,
+                uniforms:this.uniforms,
+                transparent:true,
+                wireframe:true
+            })
+            geometry.addAttribute('phase',new THREE.BufferAttribute(attributes.phase.value,1))
+            let mode = THREE.SceneUtils.createMultiMaterialObject(geometry,[new THREE.MeshLambertMaterial({
+                color:0x2283b8,
+                transparent:true,
+                opacity:0.5,
+                // side:THREE.DoubleSide
+            }),frameShader])
+
+            this.update = function () {
+                this.uniforms.time.value += this.speed;
+            }
+
+            this.modeGroup.add(mode);
+        }
+        function addCamera(loadGroup) {
+            let objLoader  = new THREE.OBJLoader();
+            objLoader.load( './mode/camera/file.obj', function (group) {
+                let geometry = group.children[0].geometry;
+                // let camera = new THREE.Mesh(geometry,new THREE.MeshLambertMaterial({
+                //     color:0x2283b8,
+                //     transparent:true,
+                //     wireframe: true
+                // }))
+                let mode = new Mode({geometry,speed:0.03});
+                mode.modeGroup.position.set(43,77,-12);
+                mode.modeGroup.scale.set(.1,.1,.1);
+                scene.add(mode.modeGroup)
+                addMouseTipaAndClick(mode.modeGroup,function () {
+                    mode.uniforms.color.value = new THREE.Color(0xff0000*Math.random());
+                    let win = document.querySelector('.win').style.display = 'block'
+                })
+                modeArray.push(mode);
+            } );
+        }
+        function addMouseTipaAndClick(group,fn) {
+            group.on('click',e=>{
+                fn();
+            })
+            group.on('mouseover',e=>{
+                document.querySelector('canvas').style.cursor = "pointer"
+            })
+            group.on('mouseout',e=>{
+                document.querySelector('canvas').style.cursor = "default"
+            })
+        }
+        function onWindowResize() {
+            let width = document.querySelector('.show').clientWidth;
+            let height = document.querySelector('.show').clientHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize( width, height );
+
+        }
+
+        init();
+    </script>
+</body>
+</html>
