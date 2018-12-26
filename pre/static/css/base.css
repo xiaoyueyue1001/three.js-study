@@ -1,0 +1,19 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+.yellow{
+    color: #ffff03;
+}
+.orange{
+    color: #ff8e5b;
+}
+.red{
+    color: #ff0001;
+}
+.skyblue{
+    color: #0bf2ed;
+}
+.bgc052d38{
+    background-color: #052d38;
+}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bunny</title>
+    <link rel="stylesheet" href="./static/css/base.css">
+    <link rel="stylesheet" href="./static/css/main.css">
+    <link rel="stylesheet" href="./static/css/initanimation.css">
+
+
+    <script src="./lib/three.js"></script>
+    <script src="./lib/OrbitControls.js"></script>
+    <script src="./lib/MTLLoader.js"></script>
+    <script src="./lib/loaders/LoaderSupport.js"></script>
+    <script src="./lib/loaders/OBJLoader.js"></script>
+    <script src="./lib/loaders/OBJLoader2.js"></script>
+    <script src="./lib/three.interaction.js"></script>
+    <script src="./lib/SceneUtils.js"></script>
+    <script src="./lib/dat.gui.min.js"></script>
+
+    <script src="./lib/echarts.js"></script>
+</head>
+<body>
+    <!--<button style="position: fixed;top: 0;left: 0;z-index: 99999" onclick="start()">Start</button>-->
+    <header>
+        <div class="left">中琛魔方</div>
+        <div class="middle">故宫智慧景区大数据</div>
+        <div class="right">
+            <span class="time"></span>
+            <span class="date"></span>
+        </div>
+    </header>
+    <div class="show-container">
+        <div class="left">
+            <div class="live">
+                <p class="title">景区实时游客</p>
+                <div>
+                    <div>
+                        <p class="title">实时客流数</p>
+                        <span class="content bgc052d38"><span class="skyblue">2425 </span> 人</span>
+                    </div>
+                    <div>
+                        <p class="title">昨日游客数</p>
+                        <span class="content bgc052d38"><span class="skyblue">12145 </span> 人</span>
+                    </div>
+                    <div>
+                        <p class="title">本月游客累计</p>
+                        <span class="content">5043254 人</span>
+                    </div>
+                    <div>
+                        <p class="title">上月同比</p>
+                        <span class="content">18%  <span style="color: #05b106;font-weight: 400;"> ↓</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="">
+                <p class="title">本月游客趋势</p>
+                <div class="tourist_form"></div>
+            </div>
+            <div class="">
+                <p class="title">游客来源分析</p>
+                <div class="source_form"></div>
+            </div>
+            <div class="">
+                <p class="title">景区预警分析</p>
+                <div class="preWarning_form"></div>
+            </div>
+        </div>
+        <div class="show">
+            <div class="info">
+                <div class="tip"  id="warningInfo">
+                    <p class="title">预警提醒:</p>
+                    <p>15:10:20 发现有不文明行为</p>
+                    <p>15:15:10 工作人员已到达现场进行处理</p>
+                    <p>15:16:11 现场情况反馈: <span class="yellow">随意丢弃垃圾</span></p>
+                    <p>15:20:22 现场情况反馈: <span class="orange">游客不接受处罚</span></p>
+                    <p>15:25:10 现场情况反馈: <span class="red">带入游客中心进一步处理</span></p>
+                </div>
+                <div class="video" id="liveVideo">
+                    <p class="title">实时视频:</p>
+                    <img src="./static/img/video.png" alt="" width="418" height="240">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="static/js/main.js"></script>
+    <!--three.js初始化-->
+    <script src="static/js/initThreeJs.js"></script>
+    <!--echarts初始化-->
+    <script src="static/js/initEcharts.js"></script>
+
+    <!--计时器-->
+    <script src="static/js/initAnimation.js"></script>
+</body>
+</html>
